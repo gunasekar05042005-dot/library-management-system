@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% from "_macros.html" import cover, availability %}
+{% block title %}{{ book.title }} · Library{% endblock %}
+{% block content %}
+  <a class="back" href="{{ url_for('books.catalog') }}">Back to books</a>
+  <article class="detail">
+    <div class="detail-cover">{{ cover(book) }}</div>
+    <div class="detail-info">
+      <h1>{{ book.title }}</h1>
+      <p class="byline">by {{ book.author }}</p>
+      {{ availability(book) }}
+      <dl>
+        <dt>Genre</dt><dd>{{ book.category }}</dd>
+        <dt>ISBN</dt><dd>{{ book.isbn or 'Not listed' }}</dd>
+        <dt>Copies</dt><dd>{{ book.available_copies }} available of {{ book.total_copies }} total</dd>
+      </dl>
+      {% if status %}
+        <div class="borrow">
+          {% if status.loan %}
+            <p class="notice">You have borrowed this book. Due back by {{ status.loan.due_date }}. <a href="{{ url_for('member.dashboard') }}">Return it from your dashboard</a>.</p>
+          {% elif book.available_copies == 0 %}
+            <p class="notice">No copies are available right now.</p>
+          {% elif status.at_limit %}
+            <p class="notice">You have {{ max_loans }} books borrowed, the maximum. Return one to borrow another.</p>
+          {% else %}
+            <form method="post" action="{{ url_for('member.borrow', book_id=book.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit">Borrow this book</button>
+            </form>
+            <p class="hint">Loan period: {{ loan_days }} days.</p>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </article>
+{% endblock %}

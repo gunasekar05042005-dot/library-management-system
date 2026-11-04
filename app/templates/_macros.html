@@ -1,0 +1,15 @@
+{# Cover image: falls back to the default cover when there is no URL or it fails to load #}
+{% macro cover(book) %}
+  {% set fallback = url_for('static', filename='img/default-cover.svg') %}
+  <img class="cover" src="{{ book.cover_url or fallback }}"
+       alt="Cover of {{ book.title }}" loading="lazy"
+       onerror="this.onerror=null;this.src='{{ fallback }}'">
+{% endmacro %}
+
+{% macro availability(book) %}
+  {% if book.available_copies > 0 %}
+    <span class="badge in-stock">{{ book.available_copies }} of {{ book.total_copies }} available</span>
+  {% else %}
+    <span class="badge out-of-stock">No copies available</span>
+  {% endif %}
+{% endmacro %}

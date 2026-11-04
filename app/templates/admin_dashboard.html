@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% from "_macros.html" import availability %}
+{% block title %}Admin dashboard · Library{% endblock %}
+{% block content %}
+  <h1>Admin dashboard</h1>
+
+  <div class="stats">
+    <div class="stat"><span class="stat-value">{{ stats.members }}</span><span class="stat-label">Total members</span></div>
+    <div class="stat"><span class="stat-value">{{ stats.books }}</span><span class="stat-label">Total books ({{ stats.copies }} copies)</span></div>
+    <div class="stat"><span class="stat-value">{{ stats.active }}</span><span class="stat-label">Active borrowings</span></div>
+    <div class="stat {{ 'alert' if stats.overdue }}"><span class="stat-value">{{ stats.overdue }}</span><span class="stat-label">Overdue borrowings</span></div>
+  </div>
+
+  <h2>Low availability</h2>
+  <p class="result-count">Books with {{ stats.threshold }} or fewer copies available.</p>
+  {% if stats.low_stock %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Title</th><th>Author</th><th>Availability</th></tr></thead>
+        <tbody>
+          {% for book in stats.low_stock %}
+            <tr>
+              <td><a href="{{ url_for('books.detail', book_id=book.id) }}">{{ book.title }}</a></td>
+              <td>{{ book.author }}</td>
+              <td>{{ availability(book) }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="empty">No books are running low. Every title has more than {{ stats.threshold }} copies available.</p>
+  {% endif %}
+{% endblock %}
