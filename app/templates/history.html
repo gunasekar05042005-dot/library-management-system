@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% from "_macros.html" import loan_table, status_tabs, pager with context %}
+{% block title %}Borrowing history · Library{% endblock %}
+{% block content %}
+  <h1>Borrowing history</h1>
+  {{ status_tabs(status) }}
+  <p class="result-count">{{ total }} record{{ '' if total == 1 else 's' }}</p>
+  {% if loans %}
+    {{ loan_table(loans) }}
+    {{ pager(page, pages) }}
+  {% else %}
+    <p class="empty">Nothing to show here yet. <a href="{{ url_for('books.catalog') }}">Browse books</a> to borrow one.</p>
+  {% endif %}
+{% endblock %}

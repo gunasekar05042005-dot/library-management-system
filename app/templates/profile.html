@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Profile · Library{% endblock %}
+{% block content %}
+  <section class="auth-card wide">
+    <h1>Your profile</h1>
+    <dl>
+      <dt>Email</dt><dd>{{ g.user.email }}</dd>
+      <dt>Account type</dt><dd>{{ g.user.role|capitalize }}</dd>
+      <dt>Member since</dt><dd>{{ member_since }}</dd>
+    </dl>
+    <form method="post" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="full_name">Full name</label>
+      <input id="full_name" name="full_name" type="text" maxlength="100" value="{{ form.full_name }}" autocomplete="name" required>
+      <label for="phone">Phone <span class="hint">(optional)</span></label>
+      <input id="phone" name="phone" type="tel" maxlength="20" value="{{ form.phone }}" autocomplete="tel">
+      <button type="submit">Save changes</button>
+    </form>
+  </section>
+{% endblock %}

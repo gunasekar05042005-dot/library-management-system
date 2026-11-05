@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% from "_macros.html" import pager with context %}
+{% block title %}Manage books · Library{% endblock %}
+{% block content %}
+  <h1>Manage books</h1>
+  <p class="actions"><a class="button" href="{{ url_for('admin.new_book') }}">Add a book</a></p>
+  <p class="result-count">{{ total }} book{{ '' if total == 1 else 's' }}</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Title</th><th>Author</th><th>Genre</th><th>ISBN</th><th>Available / total</th><th></th></tr></thead>
+      <tbody>
+        {% for book in books %}
+          <tr>
+            <td><a href="{{ url_for('books.detail', book_id=book.id) }}">{{ book.title }}</a></td>
+            <td>{{ book.author }}</td><td>{{ book.category }}</td><td>{{ book.isbn or '—' }}</td>
+            <td>{{ book.available_copies }} / {{ book.total_copies }}</td>
+            <td><a href="{{ url_for('admin.edit_book', book_id=book.id) }}">Edit</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {{ pager(page, pages) }}
+{% endblock %}

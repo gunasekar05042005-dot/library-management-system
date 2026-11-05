@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Create account · Library{% endblock %}
+{% block content %}
+  <section class="auth-card">
+    <h1>Create your account</h1>
+    <form method="post" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="full_name">Full name</label>
+      <input id="full_name" name="full_name" type="text" value="{{ form.full_name }}" autocomplete="name" required>
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" value="{{ form.email }}" autocomplete="email" required>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" minlength="{{ min_length }}" maxlength="128" autocomplete="new-password" required>
+      <p class="hint">At least {{ min_length }} characters.</p>
+      <label for="confirm_password">Confirm password</label>
+      <input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password" required>
+      <button type="submit">Create account</button>
+    </form>
+    <p class="alt">Already registered? <a href="{{ url_for('auth.login') }}">Log in</a></p>
+  </section>
+{% endblock %}

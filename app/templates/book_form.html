@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit book' if book else 'Add a book' }} · Library{% endblock %}
+{% block content %}
+  <section class="auth-card wide">
+    <h1>{{ 'Edit book' if book else 'Add a book' }}</h1>
+    {% if book and on_loan %}
+      <p class="notice">{{ on_loan }} cop{{ 'y is' if on_loan == 1 else 'ies are' }} currently borrowed. Total copies cannot go below that, and available copies update automatically.</p>
+    {% endif %}
+    <form method="post" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="title">Title</label>
+      <input id="title" name="title" type="text" maxlength="200" value="{{ form.get('title') or '' }}" required>
+      <label for="author">Author</label>
+      <input id="author" name="author" type="text" maxlength="150" value="{{ form.get('author') or '' }}" required>
+      <label for="category">Genre</label>
+      <input id="category" name="category" type="text" maxlength="50" list="genres" value="{{ form.get('category') or '' }}" required>
+      <datalist id="genres">{% for g in genres %}<option value="{{ g }}">{% endfor %}</datalist>
+      <label for="isbn">ISBN</label>
+      <input id="isbn" name="isbn" type="text" maxlength="20" value="{{ form.get('isbn') or '' }}" required>
+      <p class="hint">10 or 13 digits; hyphens are ignored. Must be unique.</p>
+      <label for="total_copies">Total copies</label>
+      <input id="total_copies" name="total_copies" type="number" min="0" max="10000" value="{{ form.get('total_copies', '') }}" required>
+      <label for="cover_url">Cover image link <span class="hint">(optional, https)</span></label>
+      <input id="cover_url" name="cover_url" type="url" maxlength="500" value="{{ form.get('cover_url') or '' }}">
+      <label for="description">Description <span class="hint">(optional)</span></label>
+      <textarea id="description" name="description" rows="5" maxlength="2000">{{ form.get('description') or '' }}</textarea>
+      <button type="submit">{{ 'Save changes' if book else 'Add book' }}</button>
+    </form>
+    <p class="alt"><a href="{{ url_for('admin.books') }}">Cancel</a></p>
+  </section>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% from "_macros.html" import pager with context %}
+{% block title %}Members · Library{% endblock %}
+{% block content %}
+  <h1>Members</h1>
+  <p class="result-count">{{ total }} member{{ '' if total == 1 else 's' }}</p>
+  {% if members %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Joined</th><th>Borrowed now</th><th>Overdue</th></tr></thead>
+        <tbody>
+          {% for m in members %}
+            <tr>
+              <td>{{ m.full_name }}</td><td>{{ m.email }}</td><td>{{ m.phone or '—' }}</td>
+              <td>{{ m.created_at[:10] }}</td><td>{{ m.active }}</td>
+              <td>{% if m.overdue %}<span class="badge overdue">{{ m.overdue }}</span>{% else %}0{% endif %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {{ pager(page, pages) }}
+  {% else %}
+    <p class="empty">No members have registered yet.</p>
+  {% endif %}
+{% endblock %}

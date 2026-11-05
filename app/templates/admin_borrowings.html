@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% from "_macros.html" import loan_table, status_tabs, pager with context %}
+{% block title %}Borrowings · Library{% endblock %}
+{% block content %}
+  <h1>All borrowing records</h1>
+  {{ status_tabs(status) }}
+  <p class="result-count">{{ total }} record{{ '' if total == 1 else 's' }}</p>
+  {% if loans %}
+    {{ loan_table(loans, show_member=True) }}
+    {{ pager(page, pages) }}
+  {% else %}
+    <p class="empty">No borrowing records match this filter.</p>
+  {% endif %}
+{% endblock %}

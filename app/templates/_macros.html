@@ -1,0 +1,58 @@
+{# Cover image. A script in main.js swaps in the default cover if the image is missing or fails to load. #}
+{% macro cover(book) %}
+  {% set fallback = url_for('static', filename='img/default-cover.svg') %}
+  <img class="cover" src="{{ book.cover_url or fallback }}" data-fallback="{{ fallback }}"
+       alt="Cover of {{ book.title }}" loading="lazy">
+{% endmacro %}
+
+{% macro availability(book) %}
+  {% if book.available_copies > 0 %}
+    <span class="badge in-stock">{{ book.available_copies }} of {{ book.total_copies }} available</span>
+  {% else %}
+    <span class="badge out-of-stock">No copies available</span>
+  {% endif %}
+{% endmacro %}
+
+{# The macros below use `request`, so import them with:  ... import x with context #}
+{% macro pager(page, pages) %}
+  {% if pages > 1 %}
+    <nav class="pager" aria-label="Pagination">
+      {% if page > 1 %}<a href="{{ request.path }}?{{ dict(request.args.to_dict(), page=page - 1)|urlencode }}">Previous</a>{% else %}<span></span>{% endif %}
+      <span>Page {{ page }} of {{ pages }}</span>
+      {% if page < pages %}<a href="{{ request.path }}?{{ dict(request.args.to_dict(), page=page + 1)|urlencode }}">Next</a>{% else %}<span></span>{% endif %}
+    </nav>
+  {% endif %}
+{% endmacro %}
+
+{% macro status_tabs(current) %}
+  <nav class="tabs" aria-label="Filter by status">
+    {% for key, label in [('', 'All'), ('borrowed', 'Borrowed'), ('overdue', 'Overdue'), ('returned', 'Returned')] %}
+      <a href="{{ request.path }}{{ '?status=' ~ key if key else '' }}" class="{{ 'active' if (current or '') == key else '' }}">{{ label }}</a>
+    {% endfor %}
+  </nav>
+{% endmacro %}
+
+{% macro status_badge(status) %}
+  <span class="badge {{ {'Returned': 'in-stock', 'Overdue': 'overdue', 'Borrowed': 'neutral'}[status] }}">{{ status }}</span>
+{% endmacro %}
+
+{% macro loan_table(loans, show_member=False) %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Book</th>{% if show_member %}<th>Member</th>{% endif %}
+        <th>Borrowed</th><th>Due</th><th>Returned</th><th>Status</th>
+      </tr></thead>
+      <tbody>
+        {% for loan in loans %}
+          <tr>
+            <td><a href="{{ url_for('books.detail', book_id=loan.book_id) }}">{{ loan.title }}</a></td>
+            {% if show_member %}<td>{{ loan.full_name }}<br><span class="book-author">{{ loan.email }}</span></td>{% endif %}
+            <td>{{ loan.borrowed_at }}</td><td>{{ loan.due_date }}</td><td>{{ loan.returned_at or '—' }}</td>
+            <td>{{ status_badge(loan.status) }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endmacro %}

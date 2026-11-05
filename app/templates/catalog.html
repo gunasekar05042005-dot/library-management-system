@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% from "_macros.html" import cover, availability %}
+{% from "_macros.html" import pager with context %}
+{% block title %}Books · Library{% endblock %}
+{% block content %}
+  <h1>Browse books</h1>
+
+  <form class="filters" method="get" action="{{ url_for('books.catalog') }}" id="filter-form">
+    <input type="search" name="q" value="{{ q }}" maxlength="100" placeholder="Search by title or author" aria-label="Search by title or author">
+    <select name="genre" aria-label="Filter by genre">
+      <option value="">All genres</option>
+      {% for g in genres %}
+        <option value="{{ g }}" {{ 'selected' if g == genre }}>{{ g }}</option>
+      {% endfor %}
+    </select>
+    <label class="check">
+      <input type="checkbox" name="available" value="1" {{ 'checked' if available_only }}>
+      Available now
+    </label>
+    <button type="submit">Search</button>
+    {% if q or genre or available_only %}
+      <a class="clear" href="{{ url_for('books.catalog') }}">Clear filters</a>
+    {% endif %}
+  </form>
+
+  <p class="result-count">{{ total }} book{{ '' if total == 1 else 's' }} found</p>
+
+  {% if books %}
+    <ul class="book-grid">
+      {% for book in books %}
+        <li>
+          <a class="book" href="{{ url_for('books.detail', book_id=book.id) }}">
+            {{ cover(book) }}
+            <span class="book-title">{{ book.title }}</span>
+            <span class="book-author">{{ book.author }}</span>
+          </a>
+          {{ availability(book) }}
+        </li>
+      {% endfor %}
+    </ul>
+    {{ pager(page, pages) }}
+  {% else %}
+    <p class="empty">No books match your search. Try a different title or author, or clear the filters.</p>
+  {% endif %}
+{% endblock %}

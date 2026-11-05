@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% from "_macros.html" import cover %}
+{% block title %}Dashboard · Library{% endblock %}
+{% block content %}
+  <h1>Your dashboard</h1>
+
+  <div class="stats">
+    <div class="stat"><span class="stat-value">{{ loans|length }} of {{ max_loans }}</span><span class="stat-label">Books borrowed</span></div>
+    <div class="stat {{ 'alert' if overdue }}"><span class="stat-value">{{ overdue }}</span><span class="stat-label">Overdue</span></div>
+    <div class="stat"><span class="stat-value">{{ loans[0].due_date if loans else 'None' }}</span><span class="stat-label">Next due date</span></div>
+  </div>
+
+  {% if overdue %}
+    <div class="flash error" role="alert">
+      You have {{ overdue }} overdue book{{ '' if overdue == 1 else 's' }}. Please return {{ 'it' if overdue == 1 else 'them' }} as soon as possible.
+    </div>
+  {% endif %}
+
+  <h2>Currently borrowed</h2>
+  {% if loans %}
+    <ul class="loan-list">
+      {% for loan in loans %}
+        <li class="loan">
+          <div class="loan-cover">{{ cover(loan) }}</div>
+          <div class="loan-info">
+            <a class="book-title" href="{{ url_for('books.detail', book_id=loan.book_id) }}">{{ loan.title }}</a>
+            <span class="book-author">{{ loan.author }}</span>
+            <span>Borrowed {{ loan.borrowed_at }} · Due {{ loan.due_date }}
+              {% if loan.is_overdue %}<span class="badge overdue">Overdue</span>{% endif %}
+            </span>
+          </div>
+          <form method="post" action="{{ url_for('member.return_loan', borrowing_id=loan.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit">Return</button>
+          </form>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">You have no borrowed books. <a href="{{ url_for('books.catalog') }}">Browse books</a> to borrow one.</p>
+  {% endif %}
+  <p class="more"><a href="{{ url_for('member.history') }}">View your full borrowing history</a></p>
+{% endblock %}
