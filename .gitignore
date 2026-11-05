@@ -1,10 +1,10 @@
-.venv/
-venv/
+instance/
 __pycache__/
 *.pyc
 .pytest_cache/
-instance/
+venv/
+.venv/
 .env
-.env.*
-!.env.example
-.DS_Store
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
