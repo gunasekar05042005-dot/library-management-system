@@ -20,6 +20,7 @@
           <a href="{{ url_for('admin.books') }}">Manage books</a>
           <a href="{{ url_for('admin.members') }}">Members</a>
           <a href="{{ url_for('admin.borrowings') }}">Borrowings</a>
+          <a href="{{ url_for('admin.database') }}">Database</a>
         {% endif %}
         <a class="who" href="{{ url_for('account.profile') }}">{{ g.user.full_name }}</a>
         <form class="inline" method="post" action="{{ url_for('auth.logout') }}">
@@ -29,6 +30,7 @@
       {% else %}
         <a href="{{ url_for('auth.login') }}">Log in</a>
         <a href="{{ url_for('auth.register') }}">Register</a>
+        <a href="{{ url_for('auth.admin_login') }}">Admin login</a>
       {% endif %}
     </nav>
   </header>

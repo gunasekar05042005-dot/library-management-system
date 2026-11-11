@@ -1,4 +1,7 @@
-from flask import (Blueprint, abort, flash, redirect, render_template, request, url_for)
+import os
+
+from flask import (Blueprint, abort, current_app, flash, redirect, render_template,
+                   request, url_for)
 
 from .auth import admin_required
 from .db import get_db
@@ -8,6 +11,22 @@ from .services.reports import list_loans, members_overview
 from .services.stats import admin_stats
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
+
+# What the read-only database viewer may show. Table and column names come from this fixed list,
+# never from the URL, and password hashes are deliberately left out.
+TABLES = {
+    "users": ["id", "full_name", "email", "phone", "role", "created_at"],
+    "books": ["id", "title", "author", "isbn", "category", "total_copies", "available_copies",
+              "cover_url", "description", "created_at"],
+    "borrowings": ["id", "user_id", "book_id", "borrowed_at", "due_date", "returned_at"],
+}
+
+
+def _database_info(db):
+    counts = {name: db.execute(f"SELECT COUNT(*) FROM {name}").fetchone()[0] for name in TABLES}
+    path = current_app.config["DATABASE"]
+    size_kb = round(os.path.getsize(path) / 1024, 1) if os.path.exists(path) else 0
+    return {"tables": TABLES, "counts": counts, "filename": os.path.basename(path), "size_kb": size_kb}
 
 
 def _genres(db):
@@ -92,3 +111,25 @@ def borrowings():
     rows, total, page, pages = list_loans(get_db(), request.args, status=status)
     return render_template("admin_borrowings.html", loans=rows, total=total, page=page,
                            pages=pages, status=status)
+
+
+@bp.route("/database")
+@admin_required
+def database():
+    return render_template("admin_database.html", current=None, **_database_info(get_db()))
+
+
+@bp.route("/database/<table>")
+@admin_required
+def database_table(table):
+    if table not in TABLES:            # only the three known tables can be opened
+        abort(404)
+    db = get_db()
+    columns = TABLES[table]
+    info = _database_info(db)
+    total = info["counts"][table]
+    page, pages, offset, per = page_info(request.args, total)
+    rows = db.execute(f"SELECT {', '.join(columns)} FROM {table} ORDER BY id LIMIT ? OFFSET ?",
+                      (per, offset)).fetchall()
+    return render_template("admin_database.html", current=table, columns=columns, rows=rows,
+                           total=total, page=page, pages=pages, **info)

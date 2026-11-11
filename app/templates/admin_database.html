@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% from "_macros.html" import pager with context %}
+{% block title %}Database · Library{% endblock %}
+{% block content %}
+  <h1>Database</h1>
+  <p class="result-count">File: <strong>{{ filename }}</strong> · {{ size_kb }} KB · read-only view. Password hashes are never shown.</p>
+  <nav class="tabs" aria-label="Tables">
+    <a href="{{ url_for('admin.database') }}" class="{{ 'active' if not current else '' }}">Overview</a>
+    {% for name in tables %}
+      <a href="{{ url_for('admin.database_table', table=name) }}" class="{{ 'active' if current == name else '' }}">{{ name }} ({{ counts[name] }})</a>
+    {% endfor %}
+  </nav>
+
+  {% if not current %}
+    <div class="stats">
+      {% for name, cols in tables.items() %}
+        <div class="stat">
+          <span class="stat-value">{{ counts[name] }}</span>
+          <span class="stat-label">{{ name }}: {{ cols|join(', ') }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="result-count">{{ total }} row{{ '' if total == 1 else 's' }} in {{ current }}</p>
+    {% if rows %}
+      <div class="table-wrap">
+        <table>
+          <thead><tr>{% for col in columns %}<th>{{ col }}</th>{% endfor %}</tr></thead>
+          <tbody>
+            {% for row in rows %}
+              <tr>{% for col in columns %}<td>{{ (row[col] if row[col] is not none else '—')|string|truncate(80) }}</td>{% endfor %}</tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {{ pager(page, pages) }}
+    {% else %}
+      <p class="empty">This table is empty.</p>
+    {% endif %}
+  {% endif %}
+{% endblock %}

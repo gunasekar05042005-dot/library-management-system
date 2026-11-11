@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Administrator sign in · Library{% endblock %}
+{% block content %}
+  <section class="auth-card">
+    <h1>Administrator sign in</h1>
+    <p class="hint">For library staff only. Only administrator accounts can sign in on this page.</p>
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="email">Administrator email</label>
+      <input id="email" name="email" type="email" autocomplete="username" required autofocus>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <button type="submit">Sign in as administrator</button>
+    </form>
+    <p class="alt">Not an administrator? <a href="{{ url_for('auth.login') }}">Member login</a></p>
+  </section>
+{% endblock %}

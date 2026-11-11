@@ -28,7 +28,9 @@
 ## Known rough edges
 | Item | Detail |
 |---|---|
-| Stale tab across login/logout | A page left open while the same browser logs in or out in another tab shows a plain "Request not accepted" page when its form is submitted (safe: nothing changes). |
+| Stale tab across login/logout | A page left open while the same browser signs in or out in another tab shows a "Request not accepted" page when its form is submitted. The page now explains why and nothing is changed; reload and retry. |
+| One session per browser | All tabs of one browser share one session cookie, so two users need two browsers, a private window, or `localhost` vs `127.0.0.1`. |
+| Terminal pauses on click (Windows) | Clicking inside the Command Prompt running the server pauses it until Enter or Esc is pressed (QuickEdit mode). See the README troubleshooting table. |
 | Multiple tabs | Tested by repeating requests from stale pages, which is what a second tab does; manual steps for real browsers are in `TEST_CASES.md` (F7) and have not been run. |
 | Manual edits to the database | `total_copies` and `available_copies` are kept consistent by the application and CHECK constraints; editing the file by hand can still desynchronise them. |
 

@@ -34,3 +34,7 @@
 | Creating admins | Only through `flask --app app create-admin`; nobody can become an admin through the website. |
 | Sessions | Last 8 hours from login, end when the password changes. |
 | Concurrency | One SQLite database file; writes are serialised, which is what makes the borrow rules correct. |
+| Administrator sign-in | A separate page at `/admin/login` accepts only administrator accounts. Administrators can also use the ordinary login and land on the admin dashboard. |
+| Database viewer | Administrators can see, read-only, every table: users (members and admins), books and borrowings. Password hashes are never shown and nothing is edited there. |
+| Database file | `instance/library.db`, created automatically when the app starts. |
+| One session per browser | Tabs of one browser share one signed-in user; a second user needs another browser or a private window. |

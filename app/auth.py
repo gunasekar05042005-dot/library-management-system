@@ -136,6 +136,24 @@ def member_required(view):
     return wrapped
 
 
+def _authenticate(require_admin=False):
+    """Check the submitted email and password. On success start a fresh session and return the
+    user; otherwise return None. One hash check always runs, so response time does not reveal
+    which emails exist, and a member's password is never accepted on the admin page."""
+    email = request.form.get("email", "").strip().lower()
+    password = request.form.get("password", "")
+    user = get_db().execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+    stored = user["password_hash"] if user else DUMMY_HASH
+    password_ok = check_password_hash(stored, password)
+    if user is None or not password_ok or (require_admin and user["role"] != "admin"):
+        return None
+    session.clear()                       # new session on login (prevents session fixation)
+    session["user_id"] = user["id"]       # the role is re-read from the database each request
+    session["pw_fp"] = fingerprint(user["password_hash"])
+    session.permanent = True
+    return user
+
+
 # ---------- routes ----------
 @bp.route("/register", methods=("GET", "POST"))
 def register():
@@ -176,26 +194,27 @@ def login():
 
     next_url = request.values.get("next", "")
     if request.method == "POST":
-        email = request.form.get("email", "").strip().lower()
-        password = request.form.get("password", "")
-        user = get_db().execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
-
-        # Always run one hash check, so response time does not reveal which emails exist.
-        stored = user["password_hash"] if user else DUMMY_HASH
-        password_ok = check_password_hash(stored, password)
-
+        user = _authenticate()
         # One generic message, so attackers can't tell which emails are registered.
-        if user is None or not password_ok:
+        if user is None:
             flash("Invalid email or password.", "error")
         else:
-            session.clear()                   # new session on login (prevents session fixation)
-            session["user_id"] = user["id"]   # the role is re-read from the database each request
-            session["pw_fp"] = fingerprint(user["password_hash"])
-            session.permanent = True
             default = "admin.dashboard" if user["role"] == "admin" else "books.catalog"
             return redirect(safe_next(next_url) or url_for(default))
 
     return render_template("login.html", next_url=next_url)
+
+
+@bp.route("/admin/login", methods=("GET", "POST"))
+def admin_login():
+    """A separate, clearly labelled sign-in for administrators. Only admin accounts get in."""
+    if g.user:
+        return redirect(url_for("admin.dashboard" if g.user["role"] == "admin" else "books.catalog"))
+    if request.method == "POST":
+        if _authenticate(require_admin=True):
+            return redirect(url_for("admin.dashboard"))
+        flash("Invalid administrator email or password.", "error")
+    return render_template("admin_login.html")
 
 
 @bp.route("/logout", methods=("POST",))

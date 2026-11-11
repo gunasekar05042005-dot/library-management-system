@@ -4,10 +4,10 @@ import click
 from flask import current_app, g
 
 
-def connect(path):
+def connect(path, timeout=10):
     # isolation_level=None -> autocommit; services open their own transactions explicitly
     # with BEGIN IMMEDIATE. WAL lets readers continue while a writer is working.
-    conn = sqlite3.connect(path, timeout=10, isolation_level=None)
+    conn = sqlite3.connect(path, timeout=timeout, isolation_level=None)
     conn.row_factory = sqlite3.Row            # access columns by name
     conn.execute("PRAGMA foreign_keys = ON")  # SQLite needs this per connection
     conn.execute("PRAGMA journal_mode = WAL")
@@ -16,7 +16,7 @@ def connect(path):
 
 def get_db():
     if "db" not in g:
-        g.db = connect(current_app.config["DATABASE"])
+        g.db = connect(current_app.config["DATABASE"], current_app.config["DB_TIMEOUT"])
     return g.db
 
 

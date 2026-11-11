@@ -18,7 +18,8 @@ def protect_forms():
         sent = request.form.get("csrf_token") or request.headers.get("X-CSRF-Token", "")
         expected = session.get("csrf_token", "")
         if not expected or not hmac.compare_digest(sent.encode(), expected.encode()):
-            abort(400, "Your session expired or the form was invalid. Please try again.")
+            abort(400, "Your session changed or expired, for example because you signed in or out in another tab. "
+                  "Please reload the page and try again.")
 
 
 def init_app(app):

@@ -60,7 +60,7 @@ For each AI-generated output: what it generated, what was correct, what was inco
 **Generated:** 59 tests including races, refresh and simulated multiple tabs; `TEST_CASES.md`.
 **Correct:** broad coverage of the rules; concurrency tests with real threads and separate connections.
 **Incorrect:** all 59 passed while nine real problems existed (section 3-5), and the lock-removal check initially went undetected.
-**Changed:** regression tests for every confirmed problem, tests for each feature added later (141 tests now), and checks that deliberately remove safeguards to prove the tests fail.
+**Changed:** regression tests for every confirmed problem, tests for each feature added later (160 tests now), and checks that deliberately remove safeguards to prove the tests fail.
 **Why:** a passing suite only proves the behaviour it asks about.
 
 ## 8. The code review itself (prompt 9)
@@ -71,5 +71,22 @@ For each AI-generated output: what it generated, what was correct, what was inco
 
 ## 9. Gap analysis and completion (prompts 10-11)
 **Generated:** a comparison of the full brief with what existed, then the missing features: profile, password reset, book description, borrowing history, admin add/edit books with the total-copies rule, member and borrowing lists, and these documents.
-**Verified:** 141 automated tests pass; the real server was started, an admin created through the command, and a login, search and admin page visited. Concurrency tests were repeated 3 times without failure.
+**Verified:** 160 automated tests pass; the real server was started, an admin created through the command, and a login, search and admin page visited. Concurrency tests were repeated 3 times without failure.
 **Not verified:** real-browser multi-tab behaviour, real email delivery, behaviour under heavy load.
+
+## 10. Problems found while the candidate ran the app (feedback round)
+**Generated earlier:** one shared login page for everyone, a database file called `library.sqlite`, reset links printed only in the terminal, and advice to copy that link by selecting text in the terminal window.
+**Correct:** roles and permissions were enforced properly and the admin pages worked.
+**Incorrect or unclear (reported by the candidate, then reproduced or explained):**
+1. There was no clearly labelled administrator sign-in; admins had to use the member login.
+2. Administrators could see members, books and loans, but not all database information in one place.
+3. The database file used `.sqlite`, not the expected `.db`.
+4. A locked file or a missing table produced a generic error page, which looked like "the database is not responding".
+5. My advice to select the reset link in the Windows Command Prompt was wrong for a running server: selecting text there pauses the program until Enter or Esc is pressed, so the terminal stops updating and pages hang.
+6. All tabs of one browser share one session cookie, so a second user cannot sign in from another tab; a form left open in another tab then showed a bare error.
+**Changed:** a separate administrator sign-in page (`/admin/login`) that accepts only admin accounts; a read-only admin Database viewer for users, books and borrowings (fixed table list, password hashes hidden); the file is now `instance/library.db` and its tables are created automatically at start; locked or missing databases show a clear "Database unavailable" page; the stale-form message explains itself; the README has a troubleshooting table covering the terminal pause and signing in as several users.
+**Why:** an administrator needs an obvious way in and a view of the data; errors should say what is wrong; and the advice given to a user must not stop the very server they are trying to use.
+**Tests:** `tests/test_admin_access.py`.
+
+## Candidate's additional observations
+*(Add your own notes here: what you checked yourself, what surprised you, and what you would change.)*

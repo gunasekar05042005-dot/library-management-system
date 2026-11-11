@@ -1,5 +1,6 @@
 import os
 import secrets
+import sqlite3
 from datetime import timedelta
 
 from flask import Flask, render_template
@@ -29,7 +30,8 @@ def create_app(test_config=None):
     os.makedirs(app.instance_path, exist_ok=True)
     app.config.from_mapping(
         SECRET_KEY=_load_secret_key(app),
-        DATABASE=os.path.join(app.instance_path, "library.sqlite"),
+        DATABASE=os.path.join(app.instance_path, "library.db"),
+        DB_TIMEOUT=10,                           # seconds to wait for a locked database
         TIMEZONE=os.environ.get("LIBRARY_TIMEZONE", "Asia/Kolkata"),
         MIN_PASSWORD_LENGTH=8,
         CSRF_ENABLED=True,
@@ -61,6 +63,19 @@ def create_app(test_config=None):
     for code in titles:
         app.register_error_handler(code, error_page)
 
+    @app.errorhandler(sqlite3.OperationalError)
+    def database_unavailable(e):
+        text = str(e).lower()
+        if "locked" in text or "busy" in text:
+            message = ("The database is busy right now. Please wait a moment and try again. "
+                       "If it keeps happening, close any other program that has the database file open.")
+        elif "no such table" in text or "no such column" in text:
+            message = "The database has not been set up yet. Stop the server, run: python seed.py, then start it again."
+        else:
+            message = "The database could not be reached. Please try again."
+        app.logger.warning("Database error: %s", e)
+        return render_template("error.html", code=503, title="Database unavailable", message=message), 503
+
     @app.after_request
     def security_headers(response):
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
@@ -71,5 +86,8 @@ def create_app(test_config=None):
             "default-src 'self'; img-src 'self' https: data:; "
             "frame-ancestors 'none'; base-uri 'self'; form-action 'self'")
         return response
+
+    with app.app_context():
+        db.init_db()   # creates missing tables or upgrades an older file, so a new .db always works
 
     return app

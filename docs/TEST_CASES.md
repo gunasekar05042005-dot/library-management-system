@@ -1,6 +1,6 @@
 # Test cases and expected results
 
-Run all automated tests: `python -m pytest` (141 tests). "Auto" = automated test in `tests/`; "Manual" = steps for a real browser.
+Run all automated tests: `python -m pytest` (160 tests). "Auto" = automated test in `tests/`; "Manual" = steps for a real browser.
 Test data: one admin (`admin@test.com`), members created per test, books with the copy counts stated.
 
 ## A. Authentication
@@ -165,6 +165,34 @@ Test data: one admin (`admin@test.com`), members created per test, books with th
 | N7 | `next` after a POST | `test_only_page_views_are_resumed_after_login` |
 | N8 | Static files hit the database | `test_static_files_do_not_query_the_user_table` |
 | N9 | Old databases, timezone, defaults | `test_old_databases_are_upgraded`, `test_today_uses_the_configured_timezone`, `test_reset_link_is_hidden_unless_demo_mode_is_on` |
+
+## O. Administrator sign-in and database viewer
+
+| ID | Test | Expected result | Type |
+|---|---|---|---|
+| O1 | Open `/admin/login`; look for links from the login page and navigation bar | Page "Administrator sign in" loads and is linked from both | Auto: `test_admin_sign_in_page_exists_and_is_linked_everywhere` |
+| O2 | Admin signs in on the admin page | Redirect to the admin dashboard | Auto: `test_admin_can_sign_in_and_lands_on_the_dashboard` |
+| O3 | Admin uses the ordinary login | Also lands on the admin dashboard | Auto: `test_admin_can_still_use_the_ordinary_login` |
+| O4 | Member credentials, wrong password, unknown email or blank form on the admin page | One generic message, no session | Auto: `test_admin_page_refuses_everyone_but_admins_with_one_generic_message` |
+| O5 | Timing: unknown email on the admin page | A password hash is still checked | Auto: `test_admin_sign_in_also_checks_a_hash_for_unknown_emails` |
+| O6 | Signed-in user opens `/admin/login` | Sent to their own home page | Auto: `test_signed_in_users_are_sent_home_from_the_admin_sign_in_page` |
+| O7 | Admin opens the Database overview and each table | Users (members and admins), books and borrowings shown; file name shown; password hashes never shown | Auto: `test_admin_sees_every_table_but_never_password_hashes` |
+| O8 | Open `/admin/database/<anything else>` | 404; nothing is queried or changed | Auto: `test_database_viewer_only_opens_the_three_known_tables` |
+| O9 | Visitor or member opens the viewer | Login redirect / 403 | Auto: `test_database_viewer_is_for_admins_only` |
+| O10 | 21 users | Paged with "Page 1 of 2" | Auto: `test_database_viewer_pages_through_rows` |
+
+## P. Database file, errors and several users
+
+| ID | Test | Expected result | Type |
+|---|---|---|---|
+| P1 | Default database file | Ends in `library.db` | Auto: `test_default_database_file_ends_in_dot_db` |
+| P2 | Start with an empty new file | Tables are created automatically | Auto: `test_a_brand_new_database_file_gets_its_tables_automatically` |
+| P3 | Another program holds the database write lock | A friendly "database is busy" page (503), no crash | Auto: `test_a_locked_database_gives_a_friendly_page_not_a_crash` |
+| P4 | Two browsers, two members and an admin at once | Each sees only their own account and permissions | Auto: `test_different_browsers_can_be_signed_in_as_different_users_at_once` |
+| P5 | Same browser opens `/login` while signed in | Redirected to the catalogue (one session per browser) | Auto: `test_one_browser_holds_one_session_so_a_second_login_page_redirects` |
+| P6 | Stale form after signing in or out in another tab | 400 page that explains why | Auto: `test_stale_form_after_signing_in_elsewhere_explains_what_happened` |
+| P7 | Real browser: sign in as a member in one browser and as the admin in a private window | Both work independently | Manual |
+| P8 | Windows Command Prompt: click inside the server window | Server pauses; Enter or Esc resumes it | Manual |
 
 ## Known issues
 See `docs/KNOWN_ISSUES.md`.

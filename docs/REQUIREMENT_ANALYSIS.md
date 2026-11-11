@@ -31,6 +31,8 @@ A basic library web application. Members browse books, borrow and return them an
 | FR-D1 | Member dashboard: current books, due dates, overdue | `member.dashboard` | `test_dashboards` |
 | FR-D2 | Admin dashboard: members, books, active, overdue, low availability | `admin.dashboard`, `services/stats.py` | `test_dashboards` |
 | FR-A1 | Admin lists all members and all borrowing records | `admin.members`, `admin.borrowings` | `test_admin` |
+| FR-A2 | Clear administrator sign-in page | `auth.admin_login`, `admin_login.html` | `test_admin_access` |
+| FR-A3 | Administrators can see all database information (read-only) | `admin.database`, `admin.database_table` | `test_admin_access` |
 
 ## 4. Non-functional requirements
 | Area | Requirement | How it is met |
@@ -39,7 +41,7 @@ A basic library web application. Members browse books, borrow and return them an
 | Concurrency | No double-borrow of the last copy | `BEGIN IMMEDIATE` plus conditional updates; threaded tests |
 | Security | Protect accounts and enforce roles | See README "Design decisions"; regression tests in `test_security_fixes` |
 | Usability | Clean, responsive, simple | Mobile-first CSS, one layout language, flash messages, keyboard focus styles |
-| Maintainability | Rules in one place, tested | `services/` layer, 141 automated tests |
+| Maintainability | Rules in one place, tested | `services/` layer, 160 automated tests |
 
 ## 5. Data requirements
 Three tables: `users` (role member/admin), `books` (including `description`, `cover_url`, `total_copies`, `available_copies`), `borrowings` (one row per loan; `returned_at` NULL means still borrowed). Status Borrowed / Returned / Overdue is derived. Full schema: `app/schema.sql`.

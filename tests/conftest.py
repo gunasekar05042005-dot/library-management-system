@@ -7,7 +7,7 @@ from app.db import get_db, init_db
 
 @pytest.fixture
 def app(tmp_path):
-    app = create_app({"TESTING": True, "DATABASE": str(tmp_path / "test.sqlite"),
+    app = create_app({"TESTING": True, "DATABASE": str(tmp_path / "test.db"),
                       "CSRF_ENABLED": False, "SHOW_RESET_LINK": True})
     with app.app_context():
         init_db()
