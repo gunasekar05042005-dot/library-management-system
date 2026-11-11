@@ -73,6 +73,3 @@ For each AI-generated output: what it generated, what was correct, what was inco
 **Generated:** a comparison of the full brief with what existed, then the missing features: profile, password reset, book description, borrowing history, admin add/edit books with the total-copies rule, member and borrowing lists, and these documents.
 **Verified:** 141 automated tests pass; the real server was started, an admin created through the command, and a login, search and admin page visited. Concurrency tests were repeated 3 times without failure.
 **Not verified:** real-browser multi-tab behaviour, real email delivery, behaviour under heavy load.
-
-## Candidate's additional observations
-*(Add your own notes here: what you checked yourself, what surprised you, and what you would change.)*
