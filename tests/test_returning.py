@@ -19,7 +19,7 @@ def borrow(app, uid, bid, today=None):
 
 def test_return_marks_loan_returned_and_restores_copy(app):
     uid, bid = add_user(app, "a@test.com"), add_book(app, total=2)
-    loan_id = borrow(app, uid, bid)
+    loan_id = borrow(app, uid, bid, today=date(2026, 11, 1))   # fixed dates: the result must not depend on the day the test runs
     assert copies(app, bid) == 1
     with app.app_context():
         title = return_book(get_db(), uid, loan_id, today=date(2026, 11, 10))
