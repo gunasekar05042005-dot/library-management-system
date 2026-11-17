@@ -2,7 +2,7 @@
 
 A small web application where members browse books, borrow and return them and track their borrowing history, and administrators manage the catalogue and see how the library is doing.
 
-**Stack:** Python 3.10+, Flask, SQLite, HTML/CSS/JavaScript (no front-end framework).
+**Stack:** Python 3.10+, Flask, SQLite, HTML/CSS/JavaScript.
 
 ## Features
 
