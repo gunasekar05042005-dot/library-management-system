@@ -37,7 +37,14 @@
   <main class="container">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% for category, message in messages %}
-        <div class="flash {{ category }}" role="alert">{{ message }}</div>
+        {% if category == 'borrow-success' %}
+          <div class="borrow-popup" role="status" aria-live="polite">
+            <span>{{ message }}</span>
+            <button class="borrow-popup-cancel" type="button">Cancel</button>
+          </div>
+        {% else %}
+          <div class="flash {{ category }}" role="alert">{{ message }}</div>
+        {% endif %}
       {% endfor %}
     {% endwith %}
     {% block content %}{% endblock %}
